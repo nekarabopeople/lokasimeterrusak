@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Lokasi Meter Rusak</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f2f7ff; }
+    h1 { color: #004B8D; }
+    .output { margin: 15px 0; font-size: 18px; }
+    button { padding: 10px 20px; margin: 5px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; }
+    .get { background: #007bff; color: white; }
+    .copy { background: #28a745; color: white; }
+  </style>
+</head>
+<body>
+  <h1>📍 Lokasi Meter Rusak</h1>
+  <div class="output">
+    <p><strong>Latitude:</strong> <span id="lat">-</span></p>
+    <p><strong>Longitude:</strong> <span id="lng">-</span></p>
+  </div>
+  <button class="get" onclick="getLocation()">🔁 Dapatkan Lokasi</button>
+  <button class="copy" onclick="copyCoords()">📋 Salin Koordinat</button>
+  <script>
+    let latitude = '', longitude = '';
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          latitude = pos.coords.latitude.toFixed(6);
+          longitude = pos.coords.longitude.toFixed(6);
+          document.getElementById("lat").textContent = latitude;
+          document.getElementById("lng").textContent = longitude;
+        }, () => alert("Gagal mengambil lokasi. Pastikan GPS aktif."));
+      } else {
+        alert("Geolocation tidak didukung.");
+      }
+    }
+    function copyCoords() {
+      if (!latitude || !longitude) return alert("Ambil lokasi dulu.");
+      const text = `${latitude}, ${longitude}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Koordinat disalin:\n" + text);
+      });
+    }
+  </script>
+</body>
+</html>
