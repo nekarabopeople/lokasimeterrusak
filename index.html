@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,67 +6,50 @@
   <title>Lokasi Meter Rusak</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f2f7ff; }
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f8ff; }
     h1 { color: #004B8D; }
-    .output { margin: 15px 0; font-size: 18px; }
-    button { padding: 10px 20px; margin: 5px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; }
+    button {
+      padding: 12px 20px; margin: 10px;
+      font-size: 16px; border: none;
+      border-radius: 8px; cursor: pointer;
+    }
     .get { background: #007bff; color: white; }
-    .status { margin-top: 15px; font-size: 16px; color: #333; }
   </style>
 </head>
 <body>
 
   <h1>📍 Lokasi Meter Rusak</h1>
-
-  <div class="output">
-    <p><strong>Latitude:</strong> <span id="lat">-</span></p>
-    <p><strong>Longitude:</strong> <span id="lng">-</span></p>
-    <p><strong>Akurasi:</strong> <span id="accuracy">-</span></p>
-    <p class="status" id="status">Silakan tekan tombol untuk mulai.</p>
-  </div>
-
   <button class="get" onclick="getLocation()">🔁 Dapatkan Lokasi</button>
+  <p style="margin-top: 20px;" id="status">Klik tombol di atas untuk mengambil koordinat.</p>
 
   <script>
-    let latitude = '', longitude = '', accuracy = '', coordsText = '';
-
     function getLocation() {
-      document.getElementById("status").innerText = "Silakan berdiri di dekat meter untuk ambil lokasi akurat...";
-      setTimeout(() => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(pos => {
-            latitude = pos.coords.latitude.toFixed(6);
-            longitude = pos.coords.longitude.toFixed(6);
-            accuracy = pos.coords.accuracy.toFixed(2);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError, {
+          enableHighAccuracy: true,
+          timeout: 10000
+        });
+        document.getElementById("status").innerText = "Mengambil lokasi...";
+      } else {
+        document.getElementById("status").innerText = "Geolocation tidak didukung oleh browser.";
+      }
+    }
 
-            document.getElementById("lat").innerText = latitude;
-            document.getElementById("lng").innerText = longitude;
-            document.getElementById("accuracy").innerText = accuracy + ' meter';
+    function showPosition(position) {
+      const lat = position.coords.latitude.toFixed(6);
+      const lng = position.coords.longitude.toFixed(6);
+      const text = `Latitude: ${lat}\nLongitude: ${lng}`;
+      document.getElementById("status").innerText = "Koordinat berhasil diambil.";
 
-            coordsText = `${latitude}, ${longitude}`;
+      // Tampilkan popup
+      alert(text);
 
-            if (parseFloat(accuracy) <= 15) {
-              document.getElementById("status").innerText = "📌 Lokasi akurat berhasil didapatkan.";
-            } else {
-              document.getElementById("status").innerText = "⚠️ Lokasi terdeteksi tapi akurasi di atas 15 meter.";
-            }
+      // Salin ke clipboard
+      navigator.clipboard.writeText(`${lat}, ${lng}`);
+    }
 
-            setTimeout(() => {
-              navigator.clipboard.writeText(coordsText).then(() => {
-                document.getElementById("status").innerText += "\n✅ Koordinat berhasil disalin ke clipboard.";
-              });
-            }, 5000); // tunggu 5 detik sebelum auto-copy
-
-          }, () => {
-            document.getElementById("status").innerText = "❌ Gagal mendapatkan lokasi. Periksa izin browser.";
-          }, {
-            enableHighAccuracy: true,
-            timeout: 10000
-          });
-        } else {
-          document.getElementById("status").innerText = "❌ Browser tidak mendukung fitur lokasi.";
-        }
-      }, 5000); // tunggu 5 detik setelah klik tombol
+    function showError(error) {
+      document.getElementById("status").innerText = "Gagal mengambil lokasi.";
     }
   </script>
 
