@@ -1,48 +1,86 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lokasi Meter Rusak</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f2f7ff; }
-    h1 { color: #004B8D; }
-    .output { margin: 15px 0; font-size: 18px; }
-    button { padding: 10px 20px; margin: 5px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; }
-    .get { background: #007bff; color: white; }
-    .copy { background: #28a745; color: white; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 1rem;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .copy {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+    .get {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+    #coords {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>📍 Lokasi Meter Rusak</h1>
-  <div class="output">
-    <p><strong>Latitude:</strong> <span id="lat">-</span></p>
-    <p><strong>Longitude:</strong> <span id="lng">-</span></p>
-  </div>
+  <h2>📍 Koordinat Lokasi Meter Rusak</h2>
+  
   <button class="get" onclick="getLocation()">🔁 Dapatkan Lokasi</button>
   <button class="copy" onclick="copyCoords()">📋 Salin Koordinat</button>
+
+  <p id="coords">Koordinat belum tersedia</p>
+
   <script>
-    let latitude = '', longitude = '';
+    let coordsText = "";
+
     function getLocation() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          latitude = pos.coords.latitude.toFixed(6);
-          longitude = pos.coords.longitude.toFixed(6);
-          document.getElementById("lat").textContent = latitude;
-          document.getElementById("lng").textContent = longitude;
-        }, () => alert("Gagal mengambil lokasi. Pastikan GPS aktif."));
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
       } else {
-        alert("Geolocation tidak didukung.");
+        document.getElementById("coords").innerText = "Geolocation tidak didukung oleh browser Anda.";
       }
     }
-    function copyCoords() {
-      if (!latitude || !longitude) return alert("Ambil lokasi dulu.");
-      const text = `${latitude}, ${longitude}`;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Koordinat disalin:\n" + text);
-      });
+
+    function showPosition(position) {
+      coordsText = position.coords.latitude + ", " + position.coords.longitude;
+      document.getElementById("coords").innerText = "📌 " + coordsText;
     }
+
+    function showError(error) {
+      document.getElementById("coords").innerText = "Gagal mendapatkan lokasi.";
+    }
+
+    function copyCoords() {
+      if (coordsText !== "") {
+        navigator.clipboard.writeText(coordsText).then(() => {
+          alert("Koordinat disalin ke clipboard!");
+        });
+      } else {
+        alert("Koordinat belum tersedia.");
+      }
+    }
+
+    // 🔁 Jalankan otomatis saat halaman dibuka
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.querySelector('.get')?.click(); // klik "Dapatkan Lokasi"
+        setTimeout(() => {
+          document.querySelector('.copy')?.click(); // klik "Salin Koordinat"
+        }, 2000); // tunggu 2 detik
+      }, 1000); // tunggu 1 detik setelah halaman load
+    });
   </script>
 </body>
 </html>
