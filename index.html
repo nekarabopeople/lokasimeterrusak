@@ -36,7 +36,7 @@
 </head>
 <body>
   <h2>📍 Koordinat Lokasi Meter Rusak</h2>
-  
+
   <button class="get" onclick="getLocation()">🔁 Dapatkan Lokasi</button>
   <button class="copy" onclick="copyCoords()">📋 Salin Koordinat</button>
 
@@ -44,42 +44,54 @@
 
   <script>
     let coordsText = "";
+    let locationReady = false;
 
     function getLocation() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition, showError);
+        navigator.geolocation.getCurrentPosition(showPosition, showError, {
+          enableHighAccuracy: true,
+          timeout: 10000
+        });
       } else {
-        document.getElementById("coords").innerText = "Geolocation tidak didukung oleh browser Anda.";
+        document.getElementById("coords").innerText = "❌ Geolocation tidak didukung.";
       }
     }
 
     function showPosition(position) {
-      coordsText = position.coords.latitude + ", " + position.coords.longitude;
-      document.getElementById("coords").innerText = "📌 " + coordsText;
+      coordsText = `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
+      document.getElementById("coords").innerText = `📌 ${coordsText}`;
+      locationReady = true;
+
+      // Auto copy setelah dapat lokasi
+      setTimeout(() => {
+        copyCoords();
+      }, 500); // 0.5 detik setelah lokasi tampil
     }
 
     function showError(error) {
-      document.getElementById("coords").innerText = "Gagal mendapatkan lokasi.";
+      document.getElementById("coords").innerText = "❌ Gagal mendapatkan lokasi.";
+      locationReady = false;
     }
 
     function copyCoords() {
-      if (coordsText !== "") {
-        navigator.clipboard.writeText(coordsText).then(() => {
-          alert("Koordinat disalin ke clipboard!");
-        });
-      } else {
-        alert("Koordinat belum tersedia.");
+      if (!locationReady || coordsText === "") {
+        alert("⚠️ Koordinat belum tersedia. Harap tunggu.");
+        return;
       }
+
+      navigator.clipboard.writeText(coordsText).then(() => {
+        alert("✅ Koordinat disalin ke clipboard!");
+      }).catch(() => {
+        alert("❌ Gagal menyalin koordinat.");
+      });
     }
 
-    // 🔁 Jalankan otomatis saat halaman dibuka
-    window.addEventListener('load', () => {
+    // 🔁 Auto trigger setelah halaman terbuka
+    window.addEventListener("load", () => {
+      // Tunggu izin lokasi muncul dulu
       setTimeout(() => {
-        document.querySelector('.get')?.click(); // klik "Dapatkan Lokasi"
-        setTimeout(() => {
-          document.querySelector('.copy')?.click(); // klik "Salin Koordinat"
-        }, 2000); // tunggu 2 detik
-      }, 1000); // tunggu 1 detik setelah halaman load
+        getLocation();
+      }, 1000); // 1 detik setelah halaman load
     });
   </script>
 </body>
